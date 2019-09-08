@@ -143,9 +143,8 @@ let last_clocked_in (clk: Clock) =
     |> Seq.tryHead
 
 /// <summary>
-/// Computes the cumulative time between start and stop events (reset events are
-/// ignored). Time between the last start and the current time is also included if
-/// the last event is a start.
+/// Computes the cumulative time between start and stop events. Time between the last start and
+/// the current time is also included if the last event is a start.
 /// </summary>
 let cumulative_times (events: Event list) =
     let process_event (cum_history, cum_seconds, last_clock_in) evt =
@@ -160,7 +159,7 @@ let cumulative_times (events: Event list) =
             (cum_seconds :: cum_history, cum_seconds, None)
 
         | ResetClock _ ->
-            (cum_seconds :: cum_history, cum_seconds, None)
+            (cum_seconds :: cum_history, 0, None)
 
     let (history_rev, _, _) =
         events
@@ -181,7 +180,7 @@ let currently_clocked_in (store: Store) =
 /// <summary>
 /// Clocks in a task at the given time
 /// </summary>
-let clock_in (store: Store) (id: string) (timestamp: System.DateTime) =
+let clock_in (store: Store) (id: string) (timestamp: System.DateTime) (check_clock_in: bool) =
     fetch_clock store id true
     |> Result.bind (fun clk ->
         if clk.Status = ClockedIn then
@@ -190,10 +189,13 @@ let clock_in (store: Store) (id: string) (timestamp: System.DateTime) =
             Result.Ok clk)
 
     |> Result.bind (fun clk ->
-        match currently_clocked_in store with
-        | None -> Result.Ok clk
-        | Some other_clk ->
-            Result.Error (sprintf "Cannot clock in %s while %s is already clocked in" id other_clk.Id))
+        if check_clock_in then
+            match currently_clocked_in store with
+            | None -> Result.Ok clk
+            | Some other_clk ->
+                Result.Error (sprintf "Cannot clock in %s while %s is already clocked in" id other_clk.Id)
+        else
+            Result.Ok clk)
 
     |> Result.map (fun clk ->
         let evt = StartClock (timestamp, id)
@@ -250,7 +252,7 @@ let clock_reset (store: Store) (id: string) (timestamp: System.DateTime) =
 /// </summary>
 let process_event (store: Store) (evt: Event) =
     match evt with
-    | StartClock (timestamp, id) -> clock_in store id timestamp
+    | StartClock (timestamp, id) -> clock_in store id timestamp false
     | StopClock (timestamp, id) -> clock_out store id timestamp
     | ResetClock (timestamp, id) -> Result.map fst (clock_reset store id timestamp)
 

@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="Config.fs" />
     <Compile Include="ClockStore.fs" />
+    <Compile Include="RPC.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
