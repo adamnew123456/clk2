@@ -1,0 +1,32 @@
+* Types
+#+BEGIN_SRC java
+  class clock {
+     String id;
+     String status; // "in", "out", "reset"
+     int elapsed_sec;
+  }
+
+  class event_server {
+     String event; // "in", "out", "reset"
+     String timestamp; // ISO date and time with timezone
+  }
+
+  class event_client {
+     String event; // "in", "out", "reset"
+     String timestamp; // ISO date and time with timezone
+     int cumulative_sec;
+  }
+#+END_SRC
+* Methods
+#+BEGIN_SRC java
+  interface RPC {
+      void start(String id);
+      void stop(String id);
+      String finish(String id);
+      event_client[] History(String id);
+      void Rewrite(String id, event_server[] events);
+
+      clock[] List();
+      String /*nullable*/ Current();
+  }
+#+END_SRC
