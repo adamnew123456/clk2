@@ -1,0 +1,50 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+.clock-container {
+    display: flex;
+    align-content: stretch;
+    flex-direction: column;
+}
+
+#new-clock-name {
+    width: 100%;
+}
+
+.clock-item {
+    border: 1px solid gray;
+    margin: 2px;
+    padding: 2px;
+}
+
+.clock-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.clock-elapsed {
+    text-align: center;
+    font-size: 20px;
+}
+
+.clock-status {
+    text-align: center;
+    font-size: 20px;
+}
+
+.clock-control {
+    display: flex;
+    align-items: stretch;
+    flex-direction: row;
+}
+
+.clock-control button {
+    width: 33%;
+    margin: 0px;
+    padding: 0px;
+}

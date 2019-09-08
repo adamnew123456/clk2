@@ -1,0 +1,28 @@
+{
+    "manifest_version": 2,
+    "name": "clk2",
+    "version": "1.0",
+    "applications": {
+        "gecko": {
+            "id": "clk2@kidneybone.com"
+        }
+    },
+
+    "sidebar_action": {
+        "default_title": "clk2",
+        "default_panel": "sidebar.html"
+    },
+
+    "options_ui": {
+        "page": "options.html"
+    },
+
+    "commands": {
+        "_execute_sidebar_action": {
+            "suggested_key": { "default": "Alt+C" },
+            "description": "Opens up the clock window in the sidebar"
+        }
+    },
+
+    "permissions": ["storage", "<all_urls>"]
+}
