@@ -1,5 +1,15 @@
 const default_endpoint = "http://localhost:6996/";
 
+function object_keys(o) {
+    let props = [];
+    for (let key in o) {
+        if (o.hasOwnProperty(o)) {
+            props.push(o);
+        }
+    }
+    return props;
+}
+
 function display_error(message) {
     document.querySelector('#status').innerText = message;
 }
@@ -87,55 +97,87 @@ function finish_clock(event) {
         .catch(display_error);
 }
 
+const ui_cache = {};
+
 function update_clocks() {
     const clock_base = document.querySelector('.clock-container');
-    while (clock_base.firstChild) {
-        clock_base.removeChild(clock_base.firstChild);
+
+    function new_clockui(clock) {
+        const dom_root = document.createElement('div');
+        dom_root.className = 'clock-item';
+
+        const dom_title = document.createElement('div');
+        dom_title.className = 'clock-title';
+        dom_title.innerText = clock.id;
+        dom_root.appendChild(dom_title);
+
+        const dom_elapsed = document.createElement('div');
+        dom_elapsed.className = 'clock-elapsed';
+        dom_elapsed.innerText = render_timespan(clock.elapsed_sec);
+        dom_root.appendChild(dom_elapsed);
+
+        const dom_status = document.createElement('div');
+        dom_status.className = 'clock-status';
+        dom_status.innerText = render_status(clock.status);
+        dom_root.appendChild(dom_status);
+
+        const dom_controls = document.createElement('div');
+        dom_controls.className = 'clock-control';
+        dom_root.appendChild(dom_controls);
+
+        const control_start = document.createElement('button');
+        control_start.innerText = 'Start';
+        control_start.dataset.clock = clock.id;
+        control_start.addEventListener('click', start_clock);
+        dom_controls.appendChild(control_start);
+
+        const control_stop = document.createElement('button');
+        control_stop.innerText = 'Stop';
+        control_stop.dataset.clock = clock.id;
+        control_stop.addEventListener('click', stop_clock);
+        dom_controls.appendChild(control_stop);
+
+        const control_finish = document.createElement('button');
+        control_finish.innerText = 'Reset';
+        control_finish.dataset.clock = clock.id;
+        control_finish.addEventListener('click', finish_clock);
+        dom_controls.appendChild(control_finish);
+
+        ui_cache[clock.id] = {
+            id: clock.id,
+            root: dom_root,
+            elapsed: dom_elapsed,
+            status: dom_status
+        };
+
+        return dom_root;
     }
 
     function render_clocks(clocks) {
+        let id_clocks = {};
         clocks.forEach(clock => {
-            const dom_root = document.createElement('div');
-            dom_root.className = 'clock-item';
+            id_clocks[clock.id] = clock;
+        });
 
-            const dom_title = document.createElement('div');
-            dom_title.className = 'clock-title';
-            dom_title.innerText = clock.id;
-            dom_root.appendChild(dom_title);
+        let changed_clocks = {};
+        clocks.forEach(clock => {
+            if (clock.id in ui_cache) {
+                changed_clocks[clock.id] = true;
+                const ui = ui_cache[clock.id];
+                ui.elapsed.innerText = render_timespan(clock.elapsed_sec);
+                ui.status.innerText = render_status(clock.status);
+            } else {
+                const dom_root = new_clockui(clock);
+                clock_base.appendChild(dom_root);
+            }
+        });
 
-            const dom_elapsed = document.createElement('div');
-            dom_elapsed.className = 'clock-elapsed';
-            dom_elapsed.innerText = render_timespan(clock.elapsed_sec);
-            dom_root.appendChild(dom_elapsed);
-
-            const dom_status = document.createElement('div');
-            dom_status.className = 'clock-status';
-            dom_status.innerText = render_status(clock.status);
-            dom_root.appendChild(dom_status);
-
-            const dom_controls = document.createElement('div');
-            dom_controls.className = 'clock-control';
-            dom_root.appendChild(dom_controls);
-
-            const control_start = document.createElement('button');
-            control_start.innerText = 'Start';
-            control_start.dataset.clock = clock.id;
-            control_start.addEventListener('click', start_clock);
-            dom_controls.appendChild(control_start);
-
-            const control_stop = document.createElement('button');
-            control_stop.innerText = 'Stop';
-            control_stop.dataset.clock = clock.id;
-            control_stop.addEventListener('click', stop_clock);
-            dom_controls.appendChild(control_stop);
-
-            const control_finish = document.createElement('button');
-            control_finish.innerText = 'Reset';
-            control_finish.dataset.clock = clock.id;
-            control_finish.addEventListener('click', finish_clock);
-            dom_controls.appendChild(control_finish);
-
-            clock_base.appendChild(dom_root);
+        object_keys(ui_cache).forEach(ui_id => {
+            if (!(ui_id in changed_clocks)) {
+                const dom_root = ui_cache[ui_id].root;
+                dom_root.parentNode.removeChild(dom_root);
+                delete ui_cache[ui_id];
+            }
         });
     }
 
@@ -156,4 +198,4 @@ document.querySelector('#new-clock-name').addEventListener('keydown', event => {
 });
 
 update_clocks();
-window.setInterval(update_clocks, 5000);
+window.setInterval(update_clocks, 1000);
