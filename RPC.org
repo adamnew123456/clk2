@@ -30,3 +30,26 @@
       String /*nullable*/ Current();
   }
 #+END_SRC
+* History/Rewrite Output Format
+- Semicolon separated values with insignificant whitespace used for alignment
+- History outputs should contain the timestamp, event and cumulative time
+- Rewrite inputs should require only the timestamp and the event. Extra fields 
+  should be ignored in case the user is passing input directly from history to 
+  rewrite.
+
+** History Example
+#+BEGIN_EXAMPLE
+2019-01-01 00:00:00; start; 0:00:00
+2019-01-01 05:36:21;  stop; 5:36:21
+2019-01-01 06:00:00; start; 5:36:21
+2019-01-01 08:30:00;  stop; 8:06:21
+2019-01-01 09:00:00; reset; 8:06:21
+#+END_EXAMPLE
+** Rewrite Example
+#+BEGIN_EXAMPLE
+2019-01-01 00:00:00; start
+2019-01-01 05:36:21;  stop
+2019-01-01 06:00:00; start
+2019-01-01 08:30:00;  stop
+2019-01-01 09:00:00; reset
+#+END_EXAMPLE
