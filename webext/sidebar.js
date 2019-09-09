@@ -3,14 +3,14 @@ const default_endpoint = "http://localhost:6996/";
 function object_keys(o) {
     let props = [];
     for (let key in o) {
-        if (o.hasOwnProperty(o)) {
-            props.push(o);
+        if (o.hasOwnProperty(key)) {
+            props.push(key);
         }
     }
     return props;
 }
 
-function display_error(message) {
+function display_status(message) {
     document.querySelector('#status').innerText = message;
 }
 
@@ -82,19 +82,19 @@ function call_rpc(method, params) {
 function start_clock(event) {
     const clock_id = event.target.dataset.clock;
     call_rpc('start', [clock_id])
-        .catch(display_error);
+        .catch(display_status);
 }
 
 function stop_clock(event) {
     const clock_id = event.target.dataset.clock;
     call_rpc('stop', [clock_id])
-        .catch(display_error);
+        .catch(display_status);
 }
 
 function finish_clock(event) {
     const clock_id = event.target.dataset.clock;
     call_rpc('finish', [clock_id])
-        .catch(display_error);
+        .catch(display_status);
 }
 
 const ui_cache = {};
@@ -159,6 +159,7 @@ function update_clocks() {
             id_clocks[clock.id] = clock;
         });
 
+        let existing_ui_ids = object_keys(ui_cache);
         let changed_clocks = {};
         clocks.forEach(clock => {
             if (clock.id in ui_cache) {
@@ -172,25 +173,27 @@ function update_clocks() {
             }
         });
 
-        object_keys(ui_cache).forEach(ui_id => {
+        existing_ui_ids.forEach(ui_id => {
             if (!(ui_id in changed_clocks)) {
                 const dom_root = ui_cache[ui_id].root;
                 dom_root.parentNode.removeChild(dom_root);
                 delete ui_cache[ui_id];
             }
         });
+
+        display_status('OK');
     }
 
     call_rpc('list', [])
         .then(render_clocks)
-        .catch(display_error);
+        .catch(display_status);
 }
 
 document.querySelector('#new-clock-name').addEventListener('keydown', event => {
     if (event.key == 'Enter') {
         event.preventDefault();
         const new_name = document.querySelector('#new-clock-name');
-        call_rpc('start', [new_name.value]).catch(display_error);
+        call_rpc('start', [new_name.value]).catch(display_status);
 
         new_name.value = '';
         return;
