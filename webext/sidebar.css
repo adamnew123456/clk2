@@ -24,13 +24,13 @@ html, body {
 .clock-title {
     text-align: center;
     font-weight: bold;
-    font-size: 24px;
+    font-size: 18px;
     line-height: 1.01em;
 }
 
 .clock-elapsed {
     text-align: center;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 1.01em;
     display: inline-block;
     width: 50%;
@@ -38,7 +38,7 @@ html, body {
 
 .clock-status {
     text-align: center;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 1.01em;
     display: inline-block;
     width: 50%;
@@ -91,4 +91,8 @@ html, body {
 
 .hidden {
     display: none;
+}
+
+button {
+    text-align: center;
 }

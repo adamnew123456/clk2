@@ -47,6 +47,17 @@ function render_status(status) {
     }
 }
 
+function zeroPad(value) {
+    if (value < 10) return "0" + value;
+    else return "" + value;
+}
+
+function render_timestamp(timestamp) {
+    const parsed = new Date(timestamp);
+    return (parsed.getFullYear() + '-' + zeroPad(parsed.getMonth() + 1) + '-' + zeroPad(parsed.getDay()) + ' ' +
+            zeroPad(parsed.getHours()) + ':' + zeroPad(parsed.getMinutes()) + ':' + zeroPad(parsed.getSeconds()));
+}
+
 function call_rpc(method, params) {
     const request = {
         jsonrpc: "2.0",
@@ -130,7 +141,7 @@ function show_history(event) {
 
             const history_timestamp = document.createElement('div');
             history_timestamp.className = 'history-timestamp';
-            history_timestamp.innerText = entry.timestamp;
+            history_timestamp.innerText = render_timestamp(entry.timestamp);
             history_item.appendChild(history_timestamp);
         });
 
@@ -199,7 +210,7 @@ function update_clocks() {
         dom_controls.appendChild(control_finish);
 
         const control_history = document.createElement('button');
-        control_history.innerText = 'History';
+        control_history.innerText = 'Log';
         control_history.dataset.clock = clock.id;
         control_history.addEventListener('click', show_history);
         dom_controls.appendChild(control_history);
