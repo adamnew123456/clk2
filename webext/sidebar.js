@@ -195,7 +195,7 @@ function update_clocks() {
         dom_controls.appendChild(control_finish);
 
         const control_history = document.createElement('button');
-        control_history.innerText = '*';
+        control_history.innerText = 'History';
         control_history.dataset.clock = clock.id;
         control_history.addEventListener('click', show_history);
         dom_controls.appendChild(control_history);
