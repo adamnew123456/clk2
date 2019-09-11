@@ -10,8 +10,17 @@ function object_keys(o) {
     return props;
 }
 
-function display_status(message) {
-    document.querySelector('#status').innerText = message;
+let error_ticks = 0;
+
+function display_status(message, temporary) {
+    if (!temporary) {
+        error_ticks = 10;
+        document.querySelector('#status').innerText = message;
+    } else if (error_ticks == 0) {
+        document.querySelector('#status').innerText = message;
+    } else {
+        error_ticks--;
+    }
 }
 
 function render_timespan(all_seconds) {
@@ -97,10 +106,52 @@ function finish_clock(event) {
         .catch(display_status);
 }
 
-const ui_cache = {};
+let history_visible = false;
+
+function show_history(event) {
+    const clock_id = event.target.dataset.clock;
+
+    const history_container = document.querySelector('.history-container');
+    function render_history(entries) {
+        entries.forEach(entry => {
+            const history_timestamp = document.createElement('div');
+            history_timestamp.innerText = entry.timestamp;
+            history_container.appendChild(history_timestamp);
+
+            const history_event = document.createElement('div');
+            history_event.innerText = entry.event;
+            history_container.appendChild(history_event);
+
+            const history_cumulative = document.createElement('div');
+            history_cumulative.innerText = render_timespan(entry.cumulative_sec);
+            history_container.appendChild(history_cumulative);
+
+            const history_sep = document.createElement('hr');
+            history_container.appendChild(history_sep);
+        });
+
+        document.querySelector('#clock-list-page').className = 'hidden';
+        document.querySelector('#history-list-page').className = '';
+        history_visible = true;
+    }
+
+    call_rpc('history', [clock_id])
+        .then(render_history)
+        .catch(display_status);
+}
+
+let ui_cache = {};
 
 function update_clocks() {
     const clock_base = document.querySelector('.clock-container');
+
+    if (history_visible) {
+        while (clock_base.firstChild) {
+            clock_base.removeChild(clock_base.firstChild);
+        }
+        ui_cache = {};
+        return;
+    }
 
     function new_clockui(clock) {
         const dom_root = document.createElement('div');
@@ -126,22 +177,28 @@ function update_clocks() {
         dom_root.appendChild(dom_controls);
 
         const control_start = document.createElement('button');
-        control_start.innerText = 'Start';
+        control_start.innerText = '|>';
         control_start.dataset.clock = clock.id;
         control_start.addEventListener('click', start_clock);
         dom_controls.appendChild(control_start);
 
         const control_stop = document.createElement('button');
-        control_stop.innerText = 'Stop';
+        control_stop.innerText = '||';
         control_stop.dataset.clock = clock.id;
         control_stop.addEventListener('click', stop_clock);
         dom_controls.appendChild(control_stop);
 
         const control_finish = document.createElement('button');
-        control_finish.innerText = 'Reset';
+        control_finish.innerText = '<<';
         control_finish.dataset.clock = clock.id;
         control_finish.addEventListener('click', finish_clock);
         dom_controls.appendChild(control_finish);
+
+        const control_history = document.createElement('button');
+        control_history.innerText = '*';
+        control_history.dataset.clock = clock.id;
+        control_history.addEventListener('click', show_history);
+        dom_controls.appendChild(control_history);
 
         ui_cache[clock.id] = {
             id: clock.id,
@@ -181,7 +238,7 @@ function update_clocks() {
             }
         });
 
-        display_status('OK');
+        display_status('OK', true);
     }
 
     call_rpc('list', [])
@@ -198,6 +255,17 @@ document.querySelector('#new-clock-name').addEventListener('keydown', event => {
         new_name.value = '';
         return;
     }
+});
+
+document.querySelector('#history-back').addEventListener('click', event => {
+    const history_container = document.querySelector('.history-container');
+    while (history_container.firstChild) {
+        history_container.removeChild(history_container.firstChild);
+    }
+
+    document.querySelector('#history-list-page').className = 'hidden';
+    document.querySelector('#clock-list-page').className = '';
+    history_visible = false;
 });
 
 update_clocks();

@@ -44,7 +44,29 @@ html, body {
 }
 
 .clock-control button {
-    width: 33%;
+    width: 25%;
     margin: 0px;
     padding: 0px;
+}
+
+#history-list-page button {
+    width: 100%;
+}
+
+.history-container {
+    display: flex;
+    align-content: stretch;
+    flex-direction: column;
+}
+
+.history-container div {
+    text-align: center;
+}
+
+.history-container hr {
+    width: 100%;
+}
+
+.hidden {
+    display: none;
 }
