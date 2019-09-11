@@ -66,12 +66,27 @@ html, body {
     flex-direction: column;
 }
 
-.history-container div {
+.history-item {
+    border: 1px solid gray;
+    margin: 2px;
+    padding: 2px;
+}
+
+.history-timestamp {
     text-align: center;
 }
 
-.history-container hr {
-    width: 100%;
+.history-event {
+    font-weight: bold;
+    text-align: center;
+    display: inline-block;
+    width: 50%;
+}
+
+.history-cumulative {
+    text-align: center;
+    display: inline-block;
+    width: 50%;
 }
 
 .hidden {

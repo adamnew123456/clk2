@@ -114,20 +114,24 @@ function show_history(event) {
     const history_container = document.querySelector('.history-container');
     function render_history(entries) {
         entries.forEach(entry => {
-            const history_timestamp = document.createElement('div');
-            history_timestamp.innerText = entry.timestamp;
-            history_container.appendChild(history_timestamp);
+            const history_item = document.createElement('div');
+            history_item.className = 'history-item';
+            history_container.append(history_item);
 
             const history_event = document.createElement('div');
+            history_event.className = 'history-event';
             history_event.innerText = entry.event;
-            history_container.appendChild(history_event);
+            history_item.appendChild(history_event);
 
             const history_cumulative = document.createElement('div');
+            history_cumulative.className = 'history-cumulative';
             history_cumulative.innerText = render_timespan(entry.cumulative_sec);
-            history_container.appendChild(history_cumulative);
+            history_item.appendChild(history_cumulative);
 
-            const history_sep = document.createElement('hr');
-            history_container.appendChild(history_sep);
+            const history_timestamp = document.createElement('div');
+            history_timestamp.className = 'history-timestamp';
+            history_timestamp.innerText = entry.timestamp;
+            history_item.appendChild(history_timestamp);
         });
 
         document.querySelector('#clock-list-page').className = 'hidden';
