@@ -54,7 +54,7 @@ function zeroPad(value) {
 
 function render_timestamp(timestamp) {
     const parsed = new Date(timestamp);
-    return (parsed.getFullYear() + '-' + zeroPad(parsed.getMonth() + 1) + '-' + zeroPad(parsed.getDay()) + ' ' +
+    return (parsed.getFullYear() + '-' + zeroPad(parsed.getMonth() + 1) + '-' + zeroPad(parsed.getDate()) + ' ' +
             zeroPad(parsed.getHours()) + ':' + zeroPad(parsed.getMinutes()) + ':' + zeroPad(parsed.getSeconds()));
 }
 
