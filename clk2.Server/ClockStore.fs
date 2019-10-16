@@ -36,6 +36,18 @@ type Store = Map<string, Clock>
 exception InvalidStore of System.DateTime * string
 
 /// <summary>
+/// Combined map/filter for maps
+/// </summary>
+let map_mapfilter (fn: 'k -> 'v -> 'v2 option) (map: Map<'k, 'v>) =
+    map
+    |> Map.toSeq
+    |> Seq.collect (fun (k, v) ->
+       match fn k v with
+       | Some v2 -> [(k, v2)]
+       | None -> [])
+    |> Map.ofSeq
+
+/// <summary>
 /// Gets the ID of an event
 /// </summary>
 let event_id (evt: Event) =
@@ -80,7 +92,7 @@ let update_store (store: Store) (clk: Clock) =
 /// Finds the bounding times for each of the clock's sessions in chronological order
 /// </summary>
 let clock_bounding_times (clk: Clock) =
-    let process_events (bounds, closed, last_start_opt, last_end_opt) evt =
+    let process_events (bounds, _, last_start_opt, last_end_opt) evt =
         match evt with
         | StartClock (timestamp, _) ->
             if Option.isSome last_start_opt then
@@ -99,7 +111,7 @@ let clock_bounding_times (clk: Clock) =
             | _ ->
                 (bounds, true, None, None)
 
-    let (bounds, closed, last_start_opt, last_end_opt) =
+    let (bounds, closed, last_start_opt, _) =
         clk.Events
         |> List.fold process_events ([], true, None, None)
 
@@ -235,7 +247,7 @@ let clock_reset (store: Store) (id: string) (timestamp: System.DateTime) =
     fetch_clock store id false
     |> Result.bind (fun clk ->
         if clk.Status <> ClockedOut then
-            Result.Error (sprintf "Clock %s must be started before it can be stopped" id)
+            Result.Error (sprintf "Clock %s must be stopped before it can be reset" id)
         else
             Result.Ok clk)
 
@@ -302,13 +314,13 @@ let truncate_clockstore (store: Store) (new_start: System.DateTime) =
                 clk.Events
                 |> List.filter (fun evt -> event_timestamp evt >= keep_start_time)
 
-            {clk with Events=keep_events}
+            Some {clk with Events=keep_events}
 
         | None ->
-            clk
+            None
 
     store
-    |> Map.map (fun _ clk -> truncate_clk clk)
+    |> map_mapfilter (fun  _ clk -> truncate_clk clk)
 
 /// <summary>
 /// Converts a ClockStore into a clock store file

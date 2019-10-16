@@ -68,6 +68,7 @@ let main _ =
         else
             Map.empty
 
+    ClockStore.serialize_clockstore store Config.store_location
     let rpc = new RPC.Wrapper(store)
     handle_requests listener rpc
 
